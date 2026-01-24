@@ -1,0 +1,195 @@
+--repeat task.wait() until game:IsLoaded()
+
+--================ SERVICES =================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+local player = Players.LocalPlayer
+
+--================ SAFE =================
+local function Char()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+local function HRP()
+    return Char():WaitForChild("HumanoidRootPart")
+end
+
+local function Hum()
+    return Char():WaitForChild("Humanoid")
+end
+
+--================ SETTINGS =================
+local Settings = {
+    AutoFarm = false,
+    BringMob = false,
+    AutoClick = false,
+    AutoFruit = false,
+    ESPPlayer = false,
+    ESPFruit = false
+}
+
+--================ UI =================
+local Gui = Instance.new("ScreenGui", game.CoreGui)
+Gui.Name = "M.Nhat_No1"
+
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.new(0,430,0,280)
+Main.Position = UDim2.new(0.5,-215,0.5,-140)
+Main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Main.Active = true
+Main.Draggable = true
+Instance.new("UICorner",Main).CornerRadius = UDim.new(0,10)
+
+local Title = Instance.new("TextLabel",Main)
+Title.Size = UDim2.new(1,0,0,40)
+Title.Text = "🔥 M.Nhat_No1 HUB | Blox Fruits"
+Title.TextColor3 = Color3.fromRGB(255,80,80)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 17
+Title.BackgroundTransparency = 1
+
+local Menu = Instance.new("Frame",Main)
+Menu.Size = UDim2.new(0,140,1,-40)
+Menu.Position = UDim2.new(0,0,0,40)
+Menu.BackgroundColor3 = Color3.fromRGB(28,28,28)
+
+local UIList = Instance.new("UIListLayout",Menu)
+UIList.Padding = UDim.new(0,6)
+
+--================ BUTTON =================
+local function Toggle(text,flag)
+    local b = Instance.new("TextButton",Menu)
+    b.Size = UDim2.new(1,-10,0,36)
+    b.BorderSizePixel = 0
+    b.Font = Enum.Font.Gotham
+    b.TextSize = 14
+    Instance.new("UICorner",b).CornerRadius = UDim.new(0,6)
+
+    local function refresh()
+        b.Text = text.." : "..(Settings[flag] and "ON" or "OFF")
+        b.BackgroundColor3 = Settings[flag] and Color3.fromRGB(60,120,60)
+            or Color3.fromRGB(45,45,45)
+        b.TextColor3 = Color3.new(1,1,1)
+    end
+
+    refresh()
+    b.MouseButton1Click:Connect(function()
+        Settings[flag] = not Settings[flag]
+        refresh()
+    end)
+end
+
+Toggle("⚔ Auto Farm","AutoFarm")
+Toggle("🧲 Gom Quái","BringMob")
+Toggle("🖱 Auto Click","AutoClick")
+Toggle("🍎 Nhặt Trái","AutoFruit")
+Toggle("👁 ESP Player","ESPPlayer")
+Toggle("🍏 ESP Fruit","ESPFruit")
+
+--================ AUTO CLICK =================
+RunService.RenderStepped:Connect(function()
+    if Settings.AutoClick then
+        pcall(function()
+            VirtualUser:Button1Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+            task.wait()
+            VirtualUser:Button1Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        end)
+    end
+end)
+
+--================ FIND MOB =================
+local function GetMob()
+    for _,v in pairs(workspace.Enemies:GetChildren()) do
+        if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0
+        and v:FindFirstChild("HumanoidRootPart") then
+            return v
+        end
+    end
+end
+
+--================ AUTO FARM =================
+task.spawn(function()
+    while task.wait() do
+        if Settings.AutoFarm then
+            pcall(function()
+                local mob = GetMob()
+                if mob then
+                    HRP().CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0,12,0)
+                end
+            end)
+        end
+    end
+end)
+
+--================ BRING MOB =================
+task.spawn(function()
+    while task.wait(0.3) do
+        if Settings.BringMob then
+            pcall(function()
+                local mob = GetMob()
+                if mob then
+                    for _,v in pairs(workspace.Enemies:GetChildren()) do
+                        if v:FindFirstChild("HumanoidRootPart") then
+                            v.HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame
+                            v.HumanoidRootPart.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+--================ AUTO FRUIT =================
+task.spawn(function()
+    while task.wait(1) do
+        if Settings.AutoFruit then
+            for _,v in pairs(workspace:GetChildren()) do
+                if string.find(v.Name,"Fruit") and v:FindFirstChild("Handle") then
+                    HRP().CFrame = v.Handle.CFrame
+                end
+            end
+        end
+    end
+end)
+
+--================ ESP =================
+local ESP = Instance.new("Folder",Gui)
+
+local function AddESP(obj,color)
+    local box = Instance.new("BoxHandleAdornment")
+    box.Adornee = obj
+    box.Size = obj.Size
+    box.AlwaysOnTop = true
+    box.Transparency = 0.5
+    box.Color3 = color
+    box.ZIndex = 10
+    box.Parent = ESP
+end
+
+RunService.RenderStepped:Connect(function()
+    ESP:ClearAllChildren()
+
+    if Settings.ESPPlayer then
+        for _,p in pairs(Players:GetPlayers()) do
+            if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                AddESP(p.Character.HumanoidRootPart,Color3.fromRGB(255,0,0))
+            end
+        end
+    end
+
+    if Settings.ESPFruit then
+        for _,v in pairs(workspace:GetChildren()) do
+            if string.find(v.Name,"Fruit") and v:FindFirstChild("Handle") then
+                AddESP(v.Handle,Color3.fromRGB(0,255,0))
+            end
+        end
+    end
+end)
+
+--================ NOTIFY =================
+game.StarterGui:SetCore("SendNotification",{
+    Title="M.Nhat_No1 HUB",
+    Text="Full Farm Loaded!",
+    Durarepeatk.wa
