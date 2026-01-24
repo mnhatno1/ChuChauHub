@@ -1,130 +1,165 @@
 --==================================================
--- 🔥 CHÚ CHÁU HUB | REDZ STYLE FARM
--- 👑 Admin: M.nhat
--- Auto Farm M1 - Fix Dame 100%
+--        CHÚ CHÁU HUB V13 - FINAL STABLE
 --==================================================
 
-repeat task.wait() until game:IsLoaded()
-
+-- SERVICES
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
 
-local lp = Players.LocalPlayer
+-- PLAYER
+local Player = Players.LocalPlayer
+local Char = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Char:WaitForChild("Humanoid")
+local HRP = Char:WaitForChild("HumanoidRootPart")
 
--- ================= CONFIG =================
+--==================================================
+-- SETTINGS
+--==================================================
 getgenv().AutoFarm = false
-getgenv().Magnet = true
-getgenv().FarmDistance = 7      -- KHOẢNG CÁCH GÂY DAME CHUẨN
-getgenv().HitboxSize = 25       -- ĐỪNG ĐỂ >30
+getgenv().FarmHeight = 4
+getgenv().AttackDelay = 0.08
+getgenv().TweenSpeed = 250
 
--- ================= ANTI AFK =================
-lp.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    task.wait(1)
-    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+--==================================================
+-- GUI
+--==================================================
+local Gui = Instance.new("ScreenGui", game.CoreGui)
+Gui.Name = "ChuChauHub"
+
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.new(0,260,0,180)
+Main.Position = UDim2.new(0.5,-130,0.5,-90)
+Main.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Main.Visible = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0,12)
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1,0,0,40)
+Title.Text = "🔥 CHÚ CHÁU HUB V13"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+
+-- BUTTON
+local FarmBtn = Instance.new("TextButton", Main)
+FarmBtn.Size = UDim2.new(1,-20,0,45)
+FarmBtn.Position = UDim2.new(0,10,0,60)
+FarmBtn.Text = "AUTO FARM : OFF"
+FarmBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+FarmBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", FarmBtn).CornerRadius = UDim.new(0,8)
+
+--==================================================
+-- LOGO PNG (CLICK ẨN MENU)
+--==================================================
+local Logo = Instance.new("ImageButton", Gui)
+Logo.Size = UDim2.new(0,60,0,60)
+Logo.Position = UDim2.new(0,10,0.5,-30)
+Logo.BackgroundTransparency = 1
+Logo.Image = "https://raw.githubusercontent.com/mnhatno1/ChuChauHub/refs/heads/main/file_000000005738720986a39eb73b58c513.png"
+Instance.new("UICorner", Logo).CornerRadius = UDim.new(1,0)
+
+Logo.MouseButton1Click:Connect(function()
+    Main.Visible = not Main.Visible
 end)
 
--- ================= FUNCTION =================
-local function Character()
-    return lp.Character or lp.CharacterAdded:Wait()
-end
-
-local function HRP()
-    return Character():WaitForChild("HumanoidRootPart")
-end
-
+--==================================================
+-- EQUIP WEAPON
+--==================================================
 local function EquipWeapon()
-    for _,v in pairs(lp.Backpack:GetChildren()) do
+    if Char:FindFirstChildOfClass("Tool") then return end
+    for _,v in pairs(Player.Backpack:GetChildren()) do
         if v:IsA("Tool") then
-            Character().Humanoid:EquipTool(v)
-            return
+            Humanoid:EquipTool(v)
+            break
         end
     end
 end
 
+--==================================================
+-- GET MOB
+--==================================================
 local function GetMob()
+    local nearest, dist = nil, math.huge
     for _,mob in pairs(workspace.Enemies:GetChildren()) do
         if mob:FindFirstChild("Humanoid")
-        and mob:FindFirstChild("HumanoidRootPart")
-        and mob.Humanoid.Health > 0 then
-            return mob
+        and mob.Humanoid.Health > 0
+        and mob:FindFirstChild("HumanoidRootPart") then
+            local d = (HRP.Position - mob.HumanoidRootPart.Position).Magnitude
+            if d < dist then
+                dist = d
+                nearest = mob
+            end
         end
     end
+    return nearest
 end
 
-local function MagnetMob(mob)
-    mob.HumanoidRootPart.Size = Vector3.new(
-        getgenv().HitboxSize,
-        getgenv().HitboxSize,
-        getgenv().HitboxSize
-    )
-    mob.HumanoidRootPart.Transparency = 1
-    mob.HumanoidRootPart.CanCollide = false
-    mob.HumanoidRootPart.CFrame = HRP().CFrame * CFrame.new(0,0,-getgenv().FarmDistance)
+--==================================================
+-- TWEEN
+--==================================================
+local function TweenTo(cf)
+    local dist = (HRP.Position - cf.Position).Magnitude
+    local time = dist / getgenv().TweenSpeed
+    TweenService:Create(
+        HRP,
+        TweenInfo.new(time, Enum.EasingStyle.Linear),
+        {CFrame = cf}
+    ):Play()
 end
 
-local function Attack()
-    VirtualUser:Button1Down(Vector2.new(0,0))
-    task.wait(0.05)
-    VirtualUser:Button1Up(Vector2.new(0,0))
-end
-
--- ================= FARM LOOP =================
+--==================================================
+-- ATTACK LOOP (DAME THẬT)
+--==================================================
 task.spawn(function()
-    while task.wait(0.12) do
+    while task.wait(getgenv().AttackDelay) do
         if getgenv().AutoFarm then
             pcall(function()
                 EquipWeapon()
+                mouse1click()
+            end)
+        end
+    end
+end)
+
+--==================================================
+-- FARM LOOP
+--==================================================
+task.spawn(function()
+    while task.wait(0.15) do
+        if getgenv().AutoFarm then
+            pcall(function()
                 local mob = GetMob()
                 if mob then
-                    if getgenv().Magnet then
-                        MagnetMob(mob)
-                    else
-                        TweenService:Create(
-                            HRP(),
-                            TweenInfo.new(0.2),
-                            {CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0,0,-getgenv().FarmDistance)}
-                        ):Play()
-                    end
-                    Attack()
+                    local mhrp = mob.HumanoidRootPart
+                    TweenTo(mhrp.CFrame * CFrame.new(0, getgenv().FarmHeight, 0))
+                    HRP.CFrame = CFrame.new(HRP.Position, mhrp.Position)
                 end
             end)
         end
     end
 end)
 
--- ================= UI MINI (REDZ KIỂU GỌN) =================
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "ChuChauRedz"
-
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.fromOffset(220,140)
-frame.Position = UDim2.fromOffset(30,200)
-frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-frame.Active = true
-frame.Draggable = true
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,16)
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.fromOffset(220,35)
-title.Text = "🔥 Chú Cháu Hub | Farm"
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-
-local toggle = Instance.new("TextButton", frame)
-toggle.Position = UDim2.fromOffset(20,60)
-toggle.Size = UDim2.fromOffset(180,45)
-toggle.Text = "AUTO FARM: OFF"
-toggle.BackgroundColor3 = Color3.fromRGB(45,45,45)
-toggle.TextColor3 = Color3.new(1,1,1)
-toggle.Font = Enum.Font.GothamBold
-toggle.TextSize = 14
-Instance.new("UICorner", toggle).CornerRadius = UDim.new(0,12)
-
-toggle.MouseButton1Click:Connect(function()
-    getgenv().AutoFarm = not getgenv().AutoFarm
-    toggle.Text = getgenv().AutoFarm and "AUTO FARM: ON" or "AUTO FARM: OFF"
+--==================================================
+-- AUTO QUEST (MẪU – CHỈNH THEO GAME)
+--==================================================
+task.spawn(function()
+    while task.wait(3) do
+        if getgenv().AutoFarm then
+            -- ví dụ:
+            -- fireclickdetector(workspace.Quest.NPC.ClickDetector)
+        end
+    end
 end)
+
+--==================================================
+-- BUTTON EVENT
+--==================================================
+FarmBtn.MouseButton1Click:Connect(function()
+    getgenv().AutoFarm = not getgenv().AutoFarm
+    FarmBtn.Text = getgenv().AutoFarm and "AUTO FARM : ON" or "AUTO FARM : OFF"
+end)
+
+print("✅ CHÚ CHÁU HUB V13 LOADED")
