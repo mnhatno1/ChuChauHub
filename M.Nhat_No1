@@ -15,7 +15,8 @@ local player = Players.LocalPlayer
 
 --================ SAFE =================
 local function Char()
-    return player.Character or player.CharacterAdded:Wait()
+    return player.Character or
+ player.CharacterAdded:Wait()
 end
 
 local function HRP()
