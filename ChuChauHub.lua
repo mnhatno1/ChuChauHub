@@ -1,95 +1,91 @@
---==================================================
--- 🔥 CHÚ CHÁU HUB V7.2 (FIXED)
--- 👑 Admin: M.nhat
--- Auto Farm | Fluxus Ready
---==================================================
+--// CHÚ CHÁU HUB V7.2 | UI CUSTOM | FLUXUS SAFE
 
-repeat task.wait() until game:IsLoaded()
+if game.CoreGui:FindFirstChild("ChuChauHub") then
+    game.CoreGui.ChuChauHub:Destroy()
+end
 
--- SERVICES
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local VirtualUser = game:GetService("VirtualUser")
-local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
 
--- GLOBAL
-getgenv().AutoFarm = false
-getgenv().FarmHeight = 30
+-- ScreenGui
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "ChuChauHub"
+gui.ResetOnSpawn = false
 
--- ANTI AFK
-player.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    task.wait(1)
-    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+-- LOGO BUTTON
+local logo = Instance.new("ImageButton", gui)
+logo.Size = UDim2.fromOffset(60,60)
+logo.Position = UDim2.fromOffset(20,200)
+logo.BackgroundColor3 = Color3.fromRGB(25,25,25)
+logo.Image = "https://raw.githubusercontent.com/mnhatno1/ChuChauHub/main/file_000000005738720986a39eb73b58c513.png"
+logo.AutoButtonColor = true
+
+local logoCorner = Instance.new("UICorner", logo)
+logoCorner.CornerRadius = UDim.new(0,15)
+
+-- MAIN MENU
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.fromOffset(380,260)
+main.Position = UDim2.fromScale(0.5,0.5)
+main.AnchorPoint = Vector2.new(0.5,0.5)
+main.BackgroundColor3 = Color3.fromRGB(30,30,30)
+main.Visible = false
+main.BorderSizePixel = 0
+
+local mainCorner = Instance.new("UICorner", main)
+mainCorner.CornerRadius = UDim.new(0,20)
+
+-- TITLE
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1,0,0,50)
+title.BackgroundTransparency = 1
+title.Text = "🔥 CHÚ CHÁU HUB V7.2 🔥"
+title.TextColor3 = Color3.fromRGB(255,170,0)
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+
+-- BUTTON FARM
+local farm = Instance.new("TextButton", main)
+farm.Size = UDim2.fromOffset(160,50)
+farm.Position = UDim2.fromOffset(20,80)
+farm.Text = "AUTO FARM"
+farm.BackgroundColor3 = Color3.fromRGB(60,60,60)
+farm.TextColor3 = Color3.new(1,1,1)
+farm.Font = Enum.Font.GothamBold
+
+local farmCorner = Instance.new("UICorner", farm)
+farmCorner.CornerRadius = UDim.new(0,14)
+
+-- BUTTON ESP
+local esp = Instance.new("TextButton", main)
+esp.Size = UDim2.fromOffset(160,50)
+esp.Position = UDim2.fromOffset(200,80)
+esp.Text = "ESP QUÁI"
+esp.BackgroundColor3 = Color3.fromRGB(60,60,60)
+esp.TextColor3 = Color3.new(1,1,1)
+esp.Font = Enum.Font.GothamBold
+
+local espCorner = Instance.new("UICorner", esp)
+espCorner.CornerRadius = UDim.new(0,14)
+
+-- TOGGLE MENU
+logo.MouseButton1Click:Connect(function()
+    main.Visible = not main.Visible
 end)
 
--- UTIL
-local function EquipWeapon()
-    local char = player.Character
-    if not char then return end
-    for _,v in pairs(player.Backpack:GetChildren()) do
-        if v:IsA("Tool") then
-            char.Humanoid:EquipTool(v)
-            break
-        end
-    end
-end
-
-local function TP(cf)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    TweenService:Create(hrp, TweenInfo.new(0.25), {CFrame = cf}):Play()
-end
-
--- AUTO FARM CORE
-task.spawn(function()
-    while task.wait() do
-        if getgenv().AutoFarm then
-            for _,mob in pairs(workspace.Enemies:GetChildren()) do
-                if mob:FindFirstChild("Humanoid")
-                and mob:FindFirstChild("HumanoidRootPart")
-                and mob.Humanoid.Health > 0 then
-
-                    repeat
-                        task.wait()
-                        EquipWeapon()
-                        TP(mob.HumanoidRootPart.CFrame * CFrame.new(0, getgenv().FarmHeight, 0))
-                        VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-                        VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-                    until mob.Humanoid.Health <= 0 or not getgenv().AutoFarm
-                end
-            end
-        end
-    end
+-- DEMO CHỨC NĂNG
+farm.MouseButton1Click:Connect(function()
+    farm.Text = "ĐANG FARM..."
 end)
 
--- UI
-local OrionLib = loadstring(game:HttpGet(
-"https://raw.githubusercontent.com/shlexware/Orion/main/source"
-))()
+esp.MouseButton1Click:Connect(function()
+    esp.Text = "ESP BẬT"
+end)
 
-local Window = OrionLib:MakeWindow({
-    Name = "🔥 Chú Cháu V7.2",
-    SaveConfig = false,
+-- THÔNG BÁO LOAD
+game:GetService("StarterGui"):SetCore("SendNotification",{
+    Title="Chú Cháu Hub",
+    Text="UI Custom Loaded Thành Công!",
+    Duration=5
 })
-
-local FarmTab = Window:MakeTab({Name="Farm"})
-FarmTab:AddToggle({
-    Name="Auto Farm",
-    Default=false,
-    Callback=function(v) getgenv().AutoFarm = v end
-})
-
-FarmTab:AddSlider({
-    Name="Bay cao (Anti hit)",
-    Min=20, Max=50, Default=30,
-    Callback=function(v) getgenv().FarmHeight = v end
-})
-
-local InfoTab = Window:MakeTab({Name="Info"})
-InfoTab:AddParagraph(
-    "Chú Cháu Hub",
-    "V7.2 FIXED\nAdmin: M.nhat\nFluxus OK"
-)
-
-OrionLib:Init()
