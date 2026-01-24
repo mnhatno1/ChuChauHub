@@ -1,53 +1,119 @@
 --==================================================
--- 🔥 CHÚ CHÁU HUB v7.1 | FLUXUS FIX
+-- 🔥 CHÚ CHÁU HUB v7.2 | FLUXUS FIX
 -- 👑 Admin: M.nhat
+-- UI: Kavo (ỔN ĐỊNH FLUXUS)
 --==================================================
 
 repeat task.wait() until game:IsLoaded()
-task.wait(3) -- ⬅️ CỰC QUAN TRỌNG CHO FLUXUS
+task.wait(2)
 
 pcall(function()
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "ChuChauHub",
-        Text = "Đang load UI...",
-        Duration = 5
+    game.StarterGui:SetCore("SendNotification",{
+        Title="ChuChauHub",
+        Text="Loading menu...",
+        Duration=5
     })
 end)
 
--- LOAD ORION (FIX)
-local OrionLib
-for i = 1,5 do
-    local success, err = pcall(function()
-        OrionLib = loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/shlexware/Orion/main/source"
-        ))()
-    end)
-    if success then break end
-    task.wait(1)
-end
+-- LOAD KAVO UI
+local Library = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"
+))()
 
-if not OrionLib then
-    warn("Không load được Orion UI")
+if not Library then
+    warn("Không load được UI")
     return
 end
 
--- TẠO WINDOW
-local Window = OrionLib:MakeWindow({
-    Name = "🔥 Chú Cháu Hub | Fluxus",
-    HidePremium = true,
-    SaveConfig = false
-})
+local Window = Library.CreateLib(
+    "🔥 Chú Cháu Hub | Fluxus",
+    "Ocean"
+)
 
-local Tab = Window:MakeTab({Name="Test"})
-Tab:AddButton({
-    Name="UI OK",
-    Callback=function()
-        game.StarterGui:SetCore("SendNotification", {
-            Title="ChuChauHub",
-            Text="UI hoạt động bình thường",
-            Duration=5
-        })
+-- FLAGS
+getgenv().AutoFarm = false
+getgenv().AutoHaki = false
+
+-- SERVICES
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local VirtualUser = game:GetService("VirtualUser")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+
+-- UTIL
+local function Char()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+local function HRP()
+    return Char():WaitForChild("HumanoidRootPart")
+end
+
+local function Equip()
+    for _,v in pairs(player.Backpack:GetChildren()) do
+        if v:IsA("Tool") then
+            Char().Humanoid:EquipTool(v)
+            return
+        end
     end
-})
+end
 
-OrionLib:Init()
+local function Attack()
+    VirtualUser:Button1Down(Vector2.new(0,0))
+    task.wait()
+    VirtualUser:Button1Up(Vector2.new(0,0))
+end
+
+-- AUTO HAKI
+task.spawn(function()
+    while task.wait(1) do
+        if getgenv().AutoHaki then
+            pcall(function()
+                ReplicatedStorage.Remotes.CommF_:InvokeServer("Buso")
+            end)
+        end
+    end
+end)
+
+-- AUTO FARM
+task.spawn(function()
+    while task.wait() do
+        if getgenv().AutoFarm then
+            for _,mob in pairs(workspace.Enemies:GetChildren()) do
+                if mob:FindFirstChild("Humanoid")
+                and mob.Humanoid.Health > 0 then
+                    repeat
+                        task.wait()
+                        Equip()
+                        TweenService:Create(
+                            HRP(),
+                            TweenInfo.new(0.2),
+                            {CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0,10,0)}
+                        ):Play()
+                        Attack()
+                    until mob.Humanoid.Health <= 0 or not getgenv().AutoFarm
+                end
+            end
+        end
+    end
+end)
+
+-- UI TABS
+local FarmTab = Window:NewTab("Farm")
+local FarmSection = FarmTab:NewSection("Auto Farm")
+
+FarmSection:NewToggle("Auto Farm Mob","",function(v)
+    getgenv().AutoFarm = v
+end)
+
+FarmSection:NewToggle("Auto Haki","",function(v)
+    getgenv().AutoHaki = v
+end)
+
+local InfoTab = Window:NewTab("Info")
+local InfoSection = InfoTab:NewSection("Thông Tin")
+
+InfoSection:NewLabel("Chú Cháu Hub v7.2")
+InfoSection:NewLabel("Admin: M.nhat")
+InfoSection:NewLabel("Fluxus Stable | No Key")
