@@ -1,10 +1,11 @@
 --[[
     ============================================
-    SCRIPT UI TỔNG HỢP - RED & BLACK THEME
-    Đã thêm 3 script con mới:
-    - Speed Hub X
-    - Luarmor Loader
-    - Zeroinhub
+    SCRIPT UI - M.nhat_Compile
+    Đã sửa:
+    - Bỏ logo script con, chỉ hiện tên
+    - Tab Info: hiện Tiktok
+    - Tab Hop: thêm script con mới
+    - Đổi tên UI thành M.nhat_Compile
     ============================================
 ]]
 
@@ -47,7 +48,7 @@ local THEME = {
 }
 
 -- ==================== AVATAR LINK ====================
-local AVATAR_URL = "https://raw.githubusercontent.com/mnhatno1/M.Nhatstore/465a00e3823237ece0a8fc077a660bddf1eba869/images.jpeg"
+local AVATAR_URL = "https://raw.githubusercontent.com/mnhat09082011-source/Mnhat/04707717b542bf8da353bf592a3b62fc4d42943d/Zeroin_nobg.png"
 local AVATAR_FILE = "mnhat_avatar.png"
 
 pcall(function()
@@ -142,12 +143,56 @@ function Modules.Zeroinhub.Stop(self)
     self.Thread = nil
 end
 
--- Danh sách module hiển thị
-local ActiveModules = { "FyyCommunity", "SpeedHubX", "Luarmor", "Zeroinhub" }
+-- Module 5: FlowAuth
+Modules.FlowAuth = {
+    Name = "FlowAuth",
+    Description = "Load script từ FlowAuth",
+    Enabled = false,
+    Thread = nil,
+}
+function Modules.FlowAuth.Start(self)
+    self.Enabled = true
+    self.Thread = task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://flowauth.net/v1/loaders/69d3463240384f3a73fbe32c178093a2.lua"))()
+        end)
+    end)
+end
+function Modules.FlowAuth.Stop(self)
+    self.Enabled = false
+    self.Thread = nil
+end
+
+-- Module 6: Pastefy Script (Tab Hop)
+Modules.PastefyScript = {
+    Name = "Pastefy Script",
+    Description = "Load script từ pastefy.app",
+    Enabled = false,
+    Thread = nil,
+}
+function Modules.PastefyScript.Start(self)
+    self.Enabled = true
+    self.Thread = task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://pastefy.app/YoZocJ8O/raw"))()
+        end)
+    end)
+end
+function Modules.PastefyScript.Stop(self)
+    self.Enabled = false
+    self.Thread = nil
+end
+
+-- Danh sách module theo tab
+local TabModules = {
+    Main = { "FyyCommunity", "SpeedHubX", "Luarmor", "Zeroinhub", "FlowAuth" },
+    Info = {},
+    Hop = { "PastefyScript" },
+}
 
 -- ==================== MAIN GUI ====================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "RedBlackUI_" .. HttpService:GenerateGUID(false)
+ScreenGui.Name = "MnhatCompile_" .. HttpService:GenerateGUID(false)
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -199,7 +244,7 @@ Title.Name = "Title"
 Title.Size = UDim2.new(0, 300, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "⚡ ZO HUB"
+Title.Text = "⚡ M.nhat_Compile"
 Title.TextColor3 = THEME.Red
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamBold
@@ -240,12 +285,31 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 6)
 closeCorner.Parent = CloseBtn
 
--- ==================== CONTENT AREA ====================
-local Content = Instance.new("Frame")
+-- ==================== TAB BAR ====================
+local TabBar = Instance.new("Frame")
+TabBar.Name = "TabBar"
+TabBar.Size = UDim2.new(1, -20, 0, 30)
+TabBar.Position = UDim2.new(0, 10, 0, 45)
+TabBar.BackgroundTransparency = 1
+TabBar.Parent = MainFrame
+
+local tabBarLayout = Instance.new("UIListLayout")
+tabBarLayout.FillDirection = Enum.FillDirection.Horizontal
+tabBarLayout.Padding = UDim.new(0, 6)
+tabBarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tabBarLayout.Parent = TabBar
+
+-- ==================== CONTENT AREA (SCROLLING) ====================
+local Content = Instance.new("ScrollingFrame")
 Content.Name = "Content"
-Content.Size = UDim2.new(1, -20, 1, -50)
-Content.Position = UDim2.new(0, 10, 0, 40)
+Content.Size = UDim2.new(1, -20, 1, -90)
+Content.Position = UDim2.new(0, 10, 0, 80)
 Content.BackgroundTransparency = 1
+Content.BorderSizePixel = 0
+Content.ScrollBarThickness = 4
+Content.ScrollBarImageColor3 = THEME.Red
+Content.CanvasSize = UDim2.new(0, 0, 0, 0)
+Content.ScrollBarImageTransparency = 0.3
 Content.Parent = MainFrame
 
 local contentGrid = Instance.new("UIGridLayout")
@@ -257,35 +321,75 @@ contentGrid.Parent = Content
 local contentPad = Instance.new("UIPadding")
 contentPad.PaddingTop = UDim.new(0, 10)
 contentPad.PaddingLeft = UDim.new(0, 5)
+contentPad.PaddingBottom = UDim.new(0, 10)
 contentPad.Parent = Content
+
+contentGrid:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    Content.CanvasSize = UDim2.new(0, 0, 0, contentGrid.AbsoluteContentSize.Y + 20)
+end)
 
 -- ==================== FLOATING TOGGLE BUTTON ====================
 local FloatBtn = Instance.new("TextButton")
 FloatBtn.Name = "FloatBtn"
 FloatBtn.Size = UDim2.new(0, 50, 0, 50)
 FloatBtn.Position = UDim2.new(0, 15, 0.5, -25)
-FloatBtn.BackgroundColor3 = THEME.Red
+FloatBtn.BackgroundColor3 = THEME.Black
 FloatBtn.Text = ""
 FloatBtn.BorderSizePixel = 0
 FloatBtn.Visible = false
+FloatBtn.Active = true
+FloatBtn.ZIndex = 2
 FloatBtn.Parent = ScreenGui
 
 local floatCorner = Instance.new("UICorner")
 floatCorner.CornerRadius = UDim.new(0, 25)
 floatCorner.Parent = FloatBtn
 
-local floatStroke = Instance.new("UIStroke")
-floatStroke.Color = THEME.Red
-floatStroke.Thickness = 2
-floatStroke.Transparency = 0.3
-floatStroke.Parent = FloatBtn
+-- VIỀN CẦU VỒNG
+local rainbowColors = {
+    Color3.fromRGB(255, 0, 0),
+    Color3.fromRGB(255, 127, 0),
+    Color3.fromRGB(255, 255, 0),
+    Color3.fromRGB(0, 255, 0),
+    Color3.fromRGB(0, 0, 255),
+    Color3.fromRGB(75, 0, 130),
+    Color3.fromRGB(148, 0, 211),
+}
 
+local rainbowStrokes = {}
+for i, color in ipairs(rainbowColors) do
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = color
+    stroke.Thickness = 1.5
+    stroke.Transparency = 0
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = FloatBtn
+    table.insert(rainbowStrokes, stroke)
+end
+
+task.spawn(function()
+    local t = 0
+    while FloatBtn.Parent do
+        t = t + 0.02
+        for i, stroke in ipairs(rainbowStrokes) do
+            local hue = (t + i / #rainbowStrokes) % 1
+            local color = Color3.fromHSV(hue, 1, 1)
+            if stroke and stroke.Parent then
+                stroke.Color = color
+            end
+        end
+        task.wait(0.05)
+    end
+end)
+
+-- AVATAR ICON
 local FloatIcon = Instance.new("ImageLabel")
 FloatIcon.Name = "FloatIcon"
-FloatIcon.Size = UDim2.new(1, -8, 1, -8)
-FloatIcon.Position = UDim2.new(0, 4, 0, 4)
+FloatIcon.Size = UDim2.new(1, -6, 1, -6)
+FloatIcon.Position = UDim2.new(0, 3, 0, 3)
 FloatIcon.BackgroundTransparency = 1
 FloatIcon.ScaleType = Enum.ScaleType.Fit
+FloatIcon.ZIndex = 3
 FloatIcon.Parent = FloatBtn
 
 local iconCorner = Instance.new("UICorner")
@@ -296,11 +400,60 @@ pcall(function()
     if getcustomasset and isfile and isfile(AVATAR_FILE) then
         FloatIcon.Image = getcustomasset(AVATAR_FILE)
     else
-        FloatIcon.Image = "rbxassetid://7072642208"
+        FloatIcon.Image = AVATAR_URL
     end
 end)
 
--- ==================== DRAGGABLE ====================
+-- GLOW
+local glow = Instance.new("ImageLabel")
+glow.Name = "Glow"
+glow.Size = UDim2.new(1, 12, 1, 12)
+glow.Position = UDim2.new(0, -6, 0, -6)
+glow.BackgroundTransparency = 1
+glow.Image = FloatIcon.Image
+glow.ImageTransparency = 0.6
+glow.ScaleType = Enum.ScaleType.Fit
+glow.ZIndex = 1
+glow.Parent = FloatBtn
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0, 30)
+glowCorner.Parent = glow
+
+-- DI CHUYỂN FLOATBTN
+local floatDragging = false
+local floatDragStart = nil
+local floatStartPos = nil
+local floatMoved = false
+
+FloatBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        floatDragging = true
+        floatMoved = false
+        floatDragStart = input.Position
+        floatStartPos = FloatBtn.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                floatDragging = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if floatDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - floatDragStart
+        if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then
+            floatMoved = true
+        end
+        FloatBtn.Position = UDim2.new(
+            floatStartPos.X.Scale, floatStartPos.X.Offset + delta.X,
+            floatStartPos.Y.Scale, floatStartPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- DRAGGABLE MAINFRAME
 local dragging = false
 local dragStart = nil
 local startPos = nil
@@ -328,7 +481,7 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ==================== TWEEN ANIMATIONS ====================
+-- TWEEN ANIMATIONS
 local function OpenUI()
     MainFrame.Visible = true
     FloatBtn.Visible = false
@@ -362,9 +515,14 @@ local function CloseUI()
 end
 
 CloseBtn.MouseButton1Click:Connect(CloseUI)
-FloatBtn.MouseButton1Click:Connect(OpenUI)
 
--- ==================== MINIMIZE / EXPAND ====================
+FloatBtn.MouseButton1Click:Connect(function()
+    if not floatMoved then
+        OpenUI()
+    end
+end)
+
+-- MINIMIZE / EXPAND
 local minimized = false
 MinBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
@@ -376,6 +534,7 @@ MinBtn.MouseButton1Click:Connect(function()
             { Size = UDim2.new(0, 500, 0, 40) }
         )
         tween:Play()
+        TabBar.Visible = false
         Content.Visible = false
     else
         MinBtn.Text = "−"
@@ -385,11 +544,12 @@ MinBtn.MouseButton1Click:Connect(function()
             { Size = UDim2.new(0, 500, 0, 300) }
         )
         tween:Play()
+        TabBar.Visible = true
         Content.Visible = true
     end
 end)
 
--- ==================== KEY TOGGLE ====================
+-- KEY TOGGLE
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == THEME.ToggleKey then
@@ -401,7 +561,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
     end
 end)
 
--- ==================== TẠO Ô SCRIPT CON ====================
+-- ==================== TẠO Ô SCRIPT CON (KHÔNG LOGO) ====================
 local function CreateModuleBox(moduleKey, layoutOrder)
     local module = Modules[moduleKey]
     if not module then return end
@@ -423,20 +583,22 @@ local function CreateModuleBox(moduleKey, layoutOrder)
     boxStroke.Transparency = 0.6
     boxStroke.Parent = box
 
+    -- TÊN SCRIPT (to, rõ)
     local nameLabel = Instance.new("TextLabel")
-    nameLabel.Size = UDim2.new(1, -20, 0, 20)
-    nameLabel.Position = UDim2.new(0, 10, 0, 10)
+    nameLabel.Size = UDim2.new(1, -20, 0, 25)
+    nameLabel.Position = UDim2.new(0, 12, 0, 10)
     nameLabel.BackgroundTransparency = 1
     nameLabel.Text = module.Name
     nameLabel.TextColor3 = THEME.Text
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Font = Enum.Font.GothamBold
-    nameLabel.TextSize = 13
+    nameLabel.TextSize = 15
     nameLabel.Parent = box
 
+    -- MÔ TẢ
     local descLabel = Instance.new("TextLabel")
     descLabel.Size = UDim2.new(1, -20, 0, 15)
-    descLabel.Position = UDim2.new(0, 10, 0, 30)
+    descLabel.Position = UDim2.new(0, 12, 0, 35)
     descLabel.BackgroundTransparency = 1
     descLabel.Text = module.Description
     descLabel.TextColor3 = THEME.TextDim
@@ -445,6 +607,7 @@ local function CreateModuleBox(moduleKey, layoutOrder)
     descLabel.TextSize = 10
     descLabel.Parent = box
 
+    -- NÚT TOGGLE
     local toggleBtn = Instance.new("TextButton")
     toggleBtn.Size = UDim2.new(0, 60, 0, 25)
     toggleBtn.Position = UDim2.new(1, -70, 1, -35)
@@ -478,11 +641,99 @@ local function CreateModuleBox(moduleKey, layoutOrder)
     end)
 end
 
-for i, modKey in ipairs(ActiveModules) do
-    CreateModuleBox(modKey, i)
+-- ==================== TẠO Ô INFO (TIKTOK) ====================
+local function CreateInfoBox()
+    local box = Instance.new("Frame")
+    box.Name = "InfoBox"
+    box.Size = UDim2.new(1, -20, 0, 60)
+    box.Position = UDim2.new(0, 10, 0, 10)
+    box.BackgroundColor3 = THEME.PanelLight
+    box.BorderSizePixel = 0
+    box.LayoutOrder = 999
+    box.Parent = Content
+
+    local boxCorner = Instance.new("UICorner")
+    boxCorner.CornerRadius = UDim.new(0, 10)
+    boxCorner.Parent = box
+
+    local boxStroke = Instance.new("UIStroke")
+    boxStroke.Color = THEME.Red
+    boxStroke.Thickness = 1
+    boxStroke.Transparency = 0.4
+    boxStroke.Parent = box
+
+    local infoLabel = Instance.new("TextLabel")
+    infoLabel.Size = UDim2.new(1, -20, 1, 0)
+    infoLabel.Position = UDim2.new(0, 15, 0, 0)
+    infoLabel.BackgroundTransparency = 1
+    infoLabel.Text = "Tiktok: tiktok.com/@m.nhatdev101"
+    infoLabel.TextColor3 = THEME.Text
+    infoLabel.TextXAlignment = Enum.TextXAlignment.Left
+    infoLabel.Font = Enum.Font.GothamBold
+    infoLabel.TextSize = 14
+    infoLabel.Parent = box
 end
+
+-- ==================== RENDER TAB ====================
+local function RenderTab(tabName)
+    for _, v in pairs(Content:GetChildren()) do
+        if v:IsA("Frame") then
+            v:Destroy()
+        end
+    end
+
+    if tabName == "Info" then
+        CreateInfoBox()
+        return
+    end
+
+    local list = TabModules[tabName]
+    if not list then return end
+
+    for i, modKey in ipairs(list) do
+        CreateModuleBox(modKey, i)
+    end
+end
+
+-- ==================== TẠO TAB BUTTON ====================
+local TabButtons = {}
+local function CreateTabButton(tabName, order)
+    local btn = Instance.new("TextButton")
+    btn.Name = tabName
+    btn.Size = UDim2.new(0, 90, 0, 28)
+    btn.BackgroundColor3 = THEME.PanelLight
+    btn.Text = tabName
+    btn.TextColor3 = THEME.Text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 12
+    btn.BorderSizePixel = 0
+    btn.LayoutOrder = order
+    btn.Parent = TabBar
+
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        for _, b in pairs(TabButtons) do
+            b.BackgroundColor3 = THEME.PanelLight
+        end
+        btn.BackgroundColor3 = THEME.RedDark
+        RenderTab(tabName)
+    end)
+
+    table.insert(TabButtons, btn)
+    return btn
+end
+
+CreateTabButton("Main", 1)
+CreateTabButton("Info", 2)
+CreateTabButton("Hop", 3)
+
+TabButtons[1].BackgroundColor3 = THEME.RedDark
+RenderTab("Main")
 
 -- ==================== INIT ====================
 MainFrame.Visible = false
 FloatBtn.Visible = true
-print("[Zo Hub] UI Loaded. Press RightShift to toggle.")
+print("[M.nhat_Compile] UI Loaded. Press RightShift to toggle.")
