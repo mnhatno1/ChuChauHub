@@ -665,8 +665,6 @@ local function CreateInfoBox()
     infoLabel.Text = "Tiktok: tiktok.com/@m.nhatdev101"
     infoLabel.TextColor3 = THEME.Text
     infoLabel.TextXAlignment = Enum.TextXAlignment.Left
-        infoLabel.TextColor3 = THEME.Text
-    infoLabel.TextXAlignment = Enum.TextXAlignment.Left
     infoLabel.Font = Enum.Font.GothamBold
     infoLabel.TextSize = 14
     infoLabel.Parent = box
