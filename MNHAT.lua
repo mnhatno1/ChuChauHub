@@ -1,11 +1,7 @@
 --[[
     ============================================
     SCRIPT UI - M.nhat_Compile
-    Đã sửa:
-    - Bỏ logo script con, chỉ hiện tên
-    - Tab Info: hiện Tiktok
-    - Tab Hop: thêm script con mới
-    - Đổi tên UI thành M.nhat_Compile
+    Bản hoàn chỉnh - đã sửa lỗi cú pháp
     ============================================
 ]]
 
@@ -163,7 +159,7 @@ function Modules.FlowAuth.Stop(self)
     self.Thread = nil
 end
 
--- Module 6: Pastefy Script (Tab Hop)
+-- Module 6: Ciao Hub (Tab Hop)
 Modules.PastefyScript = {
     Name = "Ciao Hub",
     Description = "Load script từ pastefy.app",
@@ -583,7 +579,7 @@ local function CreateModuleBox(moduleKey, layoutOrder)
     boxStroke.Transparency = 0.6
     boxStroke.Parent = box
 
-    -- TÊN SCRIPT (to, rõ)
+    -- TÊN SCRIPT
     local nameLabel = Instance.new("TextLabel")
     nameLabel.Size = UDim2.new(1, -20, 0, 25)
     nameLabel.Position = UDim2.new(0, 12, 0, 10)
@@ -666,4 +662,7 @@ local function CreateInfoBox()
     infoLabel.Size = UDim2.new(1, -20, 1, 0)
     infoLabel.Position = UDim2.new(0, 15, 0, 0)
     infoLabel.BackgroundTransparency = 1
-    infoLabel.Text = "Tiktok
+    infoLabel.Text = "Tiktok: tiktok.com/@m.nhatdev101"
+    infoLabel.TextColor3 = THEME.Text
+    infoLabel.TextXAlignment = Enum.TextXAlignment.Left
+    infoLab
