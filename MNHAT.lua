@@ -1,7 +1,7 @@
 --[[
     ============================================
     SCRIPT UI - M.nhat_Compile
-    Bản hoàn chỉnh - đã sửa lỗi cú pháp
+    Bản hoàn chỉnh - đã nối phần bị thiếu
     ============================================
 ]]
 
@@ -665,4 +665,4 @@ local function CreateInfoBox()
     infoLabel.Text = "Tiktok: tiktok.com/@m.nhatdev101"
     infoLabel.TextColor3 = THEME.Text
     infoLabel.TextXAlignment = Enum.TextXAlignment.Left
-    infoLab
+    infoL
