@@ -165,7 +165,7 @@ end
 
 -- Module 6: Pastefy Script (Tab Hop)
 Modules.PastefyScript = {
-    Name = "Pastefy Script",
+    Name = "Ciao Hub",
     Description = "Load script từ pastefy.app",
     Enabled = false,
     Thread = nil,
@@ -666,74 +666,4 @@ local function CreateInfoBox()
     infoLabel.Size = UDim2.new(1, -20, 1, 0)
     infoLabel.Position = UDim2.new(0, 15, 0, 0)
     infoLabel.BackgroundTransparency = 1
-    infoLabel.Text = "Tiktok: tiktok.com/@m.nhatdev101"
-    infoLabel.TextColor3 = THEME.Text
-    infoLabel.TextXAlignment = Enum.TextXAlignment.Left
-    infoLabel.Font = Enum.Font.GothamBold
-    infoLabel.TextSize = 14
-    infoLabel.Parent = box
-end
-
--- ==================== RENDER TAB ====================
-local function RenderTab(tabName)
-    for _, v in pairs(Content:GetChildren()) do
-        if v:IsA("Frame") then
-            v:Destroy()
-        end
-    end
-
-    if tabName == "Info" then
-        CreateInfoBox()
-        return
-    end
-
-    local list = TabModules[tabName]
-    if not list then return end
-
-    for i, modKey in ipairs(list) do
-        CreateModuleBox(modKey, i)
-    end
-end
-
--- ==================== TẠO TAB BUTTON ====================
-local TabButtons = {}
-local function CreateTabButton(tabName, order)
-    local btn = Instance.new("TextButton")
-    btn.Name = tabName
-    btn.Size = UDim2.new(0, 90, 0, 28)
-    btn.BackgroundColor3 = THEME.PanelLight
-    btn.Text = tabName
-    btn.TextColor3 = THEME.Text
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 12
-    btn.BorderSizePixel = 0
-    btn.LayoutOrder = order
-    btn.Parent = TabBar
-
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 6)
-    c.Parent = btn
-
-    btn.MouseButton1Click:Connect(function()
-        for _, b in pairs(TabButtons) do
-            b.BackgroundColor3 = THEME.PanelLight
-        end
-        btn.BackgroundColor3 = THEME.RedDark
-        RenderTab(tabName)
-    end)
-
-    table.insert(TabButtons, btn)
-    return btn
-end
-
-CreateTabButton("Main", 1)
-CreateTabButton("Info", 2)
-CreateTabButton("Hop", 3)
-
-TabButtons[1].BackgroundColor3 = THEME.RedDark
-RenderTab("Main")
-
--- ==================== INIT ====================
-MainFrame.Visible = false
-FloatBtn.Visible = true
-print("[M.nhat_Compile] UI Loaded. Press RightShift to toggle.")
+    infoLabel.Text = "Tiktok
